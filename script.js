@@ -1,27 +1,42 @@
 //your JS code here. If required.
-function waitForMultiplePromises() {
-  const table = document.querySelector('table');
-  const loadingRow = table.insertRow();
-  const loadingCell = loadingRow.insertCell();
-  loadingCell.colSpan = 2;
-  loadingCell.textContent = 'Loading...';
-
-  const promises = [];
-  for (let i = 0; i < 3; i++) {
-    const time = Math.floor(Math.random() * 3 + 1) * 1000;
-    promises.push(new Promise(resolve => setTimeout(() => resolve(time), time)));
-  }
-
-  const start = performance.now();
-  Promise.all(promises).then(times => {
-    table.deleteRow(0);
-    times.forEach((time, index) => {
-      const row = table.insertRow();
-      row.insertCell().textContent = `Promise ${index + 1}`;
-      row.insertCell().textContent = `${time / 1000}`;
+  const promises = [
+    new Promise(resolve => setTimeout(() => resolve("Promise 1"), Math.random() * 2000 + 1000)),
+    new Promise(resolve => setTimeout(() => resolve("Promise 2"), Math.random() * 2000 + 1000)),
+    new Promise(resolve => setTimeout(() => resolve("Promise 3"), Math.random() * 2000 + 1000))
+  ];
+  
+  // Wait for all Promises to resolve using Promise.all
+  Promise.all(promises).then(results => {
+    const loadingRow = document.querySelector("tbody tr");
+    const tableBody = document.querySelector("tbody");
+    const total = results.reduce((acc, cur) => acc + cur.length, 0) / 1000;
+    
+    // Remove the "Loading..." row and populate the table with the results
+    tableBody.removeChild(loadingRow);
+    results.forEach((result, index) => {
+      const row = document.createElement("tr");
+      const promiseCell = document.createElement("td");
+      const timeCell = document.createElement("td");
+      
+      promiseCell.textContent = `Promise ${index + 1}`;
+      timeCell.textContent = `${result.length / 1000}`;
+      
+      row.appendChild(promiseCell);
+      row.appendChild(timeCell);
+      
+      tableBody.appendChild(row);
     });
-    const totalRow = table.insertRow();
-    totalRow.insertCell().textContent = 'Total';
-    totalRow.insertCell().textContent = `${(performance.now() - start) / 1000}`;
+    
+    // Add the row with the total time taken
+    const totalRow = document.createElement("tr");
+    const totalLabelCell = document.createElement("td");
+    const totalTimeCell = document.createElement("td");
+    
+    totalLabelCell.textContent = "Total";
+    totalTimeCell.textContent = `${total}`;
+    
+    totalRow.appendChild(totalLabelCell);
+    totalRow.appendChild(totalTimeCell);
+    
+    tableBody.appendChild(totalRow);
   });
-}
